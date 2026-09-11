@@ -1,6 +1,6 @@
 # Formato común de cursos y actividades
 
-Los datos se mantienen en src/data/courses.js y src/data/activities.js. La vista recorre colecciones; CourseCard recibe un objeto course. La corrección se encuentra en src/domain/practice.js.
+Los datos se mantienen en src/data/courses.js, src/data/activities.js y src/data/javascriptCourse.js. La vista recorre colecciones; CourseCard recibe course y practiceCount desde el padre. La corrección se encuentra en src/domain/practice.js y las reglas de avance en src/domain/learning.js.
 
 ## Curso o tutorial
 
@@ -21,7 +21,9 @@ Ejemplo del formato actual:
 
 id es un slug estable y único: no se cambia al retitular el curso. name y description son textos visibles; visual contiene una abreviatura legible y una leyenda. category orienta al usuario sin afirmar que todas las propuestas sean lenguajes.
 
-En esta entrega el único estado de curso admitido es coming-soon, con entryRoute null y units vacío. El acceso al curso completo está deshabilitado en el componente. No se habilita automáticamente por cambiar un dato: cuando se implemente el recorrido completo deberán agregarse su vista, navegación, validaciones, estado available y pruebas antes de modificar ese acceso.
+Estados de curso: coming-soon, con entryRoute null y units vacío, para los ocho recorridos pendientes; available, con unidades y ruta funcional, para JavaScript. CourseCard solo muestra el acceso al recorrido si el estado, la ruta y las unidades están presentes. Antes de habilitar otro curso hay que implementar su ruta y comprobar todo su contenido.
+
+CourseCard emite seleccionar con { courseId, destination: 'course' | 'practice' }. CoursesPage recibe el evento, valida el curso y realiza la navegación. La tarjeta no depende del router. UnitCard recibe unit, number, status y completedLessons, y emite seleccionar con el id de unidad; JavaScriptCoursePage decide la navegación.
 
 ## Actividad de opción única
 
@@ -46,7 +48,7 @@ En esta entrega el único estado de curso admitido es coming-soon, con entryRout
 
 Cada actividad tiene id globalmente único y courseId existente. Las opciones deben tener identificadores únicos dentro de la pregunta y exactamente una debe coincidir con answerId. Todos los campos explicativos son obligatorios. Solo se admite single-choice en esta entrega.
 
-activitiesForCourse(id) entrega las preguntas en su orden editorial. CourseCard cuenta esas preguntas y habilita “Probar actividades” únicamente si hay contenido. Una propuesta sin actividades conserva únicamente el acceso deshabilitado al curso completo.
+activitiesForCourse(id) entrega las tres preguntas introductorias de una tecnología, en orden editorial. CoursesPage pasa su cantidad a CourseCard. Las veinte actividades del recorrido están en las lecciones de javascriptCourse.js; javascriptActivities permite recorrerlas en una colección plana. Ambos grupos usan el mismo contrato y el mismo evaluador, con identificadores globalmente únicos.
 
 Los ejemplos y alternativas se muestran mediante interpolación de texto. No usar v-html, eval ni ejecución de código aportado por cursos. Esta práctica es pedagógica, sin calificación oficial: la solución está en el cliente.
 
@@ -61,21 +63,32 @@ Los ejemplos y alternativas se muestran mediante interpolación de texto. No usa
 
 No agregar markup de tarjetas o lógica de corrección por cada tecnología. Las diferencias corresponden a los datos.
 
-## Estructura prevista para unidades
+## Unidades y lecciones implementadas
 
-Contrato propuesto para una etapa futura; todavía no tiene renderer:
+Formato del recorrido actual:
 
 ```js
 {
-  id: 'html-estructura',
-  title: 'Estructura de una página',
+  id: 'variables',
+  title: 'Variables y tipos de datos',
+  description: 'Guardá información y distinguí sus tipos.',
+  status: 'available', // Estado inicial; las siguientes unidades empiezan locked.
+  icon: 'inventory_2',
   lessons: [{
-    id: 'html-primera-pagina',
-    title: 'Tu primera página',
-    content: [{ type: 'paragraph', text: '...' }, { type: 'code', text: '...' }],
-    activityIds: ['html-heading']
+    id: 'guardar-valores',
+    title: 'Guardá tus primeros valores',
+    description: 'Conocé let y const.',
+    content: ['Explicación del concepto.', 'Desarrollo con un ejemplo.'],
+    code: 'let puntos = 1;',
+    activities: [/* objetos single-choice; incluyen lessonId */]
   }]
 }
 ```
 
-El orden será el de las colecciones. La persistencia futura guardará resultados por identificadores estables y versión de contenido; no se debe almacenar progreso inventado en los objetos de catálogo.
+El orden es el de las colecciones. UnitPage y LessonPage presentan esos datos. PracticePage recibe unitId y lessonId para elegir los ejercicios del recorrido, y se reinicia cuando cambia cualquiera de esos parámetros.
+
+Estado visible de unidad: available (Disponible), locked (Bloqueada) o completed (Completada). Se calcula desde las lecciones aprobadas: todas las unidades anteriores deben estar completas; dentro de una unidad deben aprobarse las lecciones anteriores. Una lección se aprueba únicamente si se respondieron todas sus actividades correctamente. Reintentar no duplica ni borra aprobaciones.
+
+src/stores/learningProgress.js conserva los identificadores aprobados en un ref compartido y de lectura pública. No utiliza localStorage, sessionStorage ni servicios externos. Al recargar se pierde el avance. Un guard global de Vue Router también verifica el acceso cuando se pega una dirección o cambian sus parámetros. Son reglas pedagógicas del cliente, no un sistema de evaluación con protección contra manipulación.
+
+Para incorporar recorridos de otros equipos, usar estos formatos y ampliar el acceso a cursos, los selectores de contenido y las rutas; por ahora el recorrido secuencial se conecta específicamente a JavaScript. La persistencia futura deberá guardar identificadores estables y versión de contenido.

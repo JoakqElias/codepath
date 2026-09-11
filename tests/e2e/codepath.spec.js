@@ -3,6 +3,7 @@ import { courses } from '../../src/data/courses.js'
 import { activitiesForCourse } from '../../src/data/activities.js'
 
 test('inicio, catálogo, paleta real de Quasar y enlaces de escritorio', async ({ page }) => {
+  test.setTimeout(60000)
   await page.setViewportSize({ width: 1440, height: 1000 })
   const errors = []
   page.on('pageerror', error => errors.push(error.message))
@@ -12,11 +13,13 @@ test('inicio, catálogo, paleta real de Quasar y enlaces de escritorio', async (
   await page.screenshot({ path: 'test-results/inicio-escritorio.png', fullPage: true })
   await page.getByRole('link', { name: 'Explorar cursos y tutoriales' }).click()
   await expect(page.getByRole('article')).toHaveCount(9)
-  await expect(page.getByRole('button', { name: /Curso completo de .*Próximamente/ })).toHaveCount(9)
+  await expect(page.getByRole('button', { name: /Curso completo de .*Próximamente/ })).toHaveCount(8)
   for (const course of courses) {
     const card = page.getByRole('article', { name: course.name, exact: true })
-    await expect(card.getByRole('button', { name: /Curso completo/ })).toBeDisabled()
-    await expect(card.getByRole('link', { name: 'Probar actividades de ' + course.name, exact: true })).toHaveAttribute('href', '#/cursos/' + course.id + '/actividades')
+    if (course.status === 'coming-soon') await expect(card.getByRole('button', { name: /Curso completo/ })).toBeDisabled()
+    await card.getByRole('button', { name: 'Probar actividades de ' + course.name, exact: true }).click()
+    await expect(page).toHaveURL(new RegExp('/cursos/' + course.id + '/actividades$'))
+    await page.getByRole('link', { name: 'Volver al catálogo' }).click()
   }
   await page.screenshot({ path: 'test-results/cursos-escritorio.png', fullPage: true })
   await page.getByRole('navigation', { name: 'Navegación principal' }).getByRole('link', { name: 'Lecciones' }).click()
@@ -70,7 +73,7 @@ test('navegación móvil accesible, foco y sin progreso persistido', async ({ pa
   await expect(page.getByRole('main')).toHaveCount(1)
   await expect(page.getByRole('main')).toBeFocused()
   await page.screenshot({ path: 'test-results/cursos-movil.png', fullPage: true })
-  await page.getByRole('link', { name: 'Probar actividades de HTML', exact: true }).click()
+  await page.getByRole('button', { name: 'Probar actividades de HTML', exact: true }).click()
   await page.getByRole('radio', { name: '<h1>', exact: true }).click()
   await page.getByRole('button', { name: 'Comprobar respuesta' }).click()
   await expect(page.getByText('¡Respuesta correcta!', { exact: true })).toBeVisible()
@@ -88,7 +91,7 @@ test('navegación móvil accesible, foco y sin progreso persistido', async ({ pa
 for (const width of [320, 390, 768, 1440]) {
   test('sin desborde horizontal a ' + width + ' px', async ({ page }) => {
     await page.setViewportSize({ width, height: 900 })
-    for (const route of ['/', '/#/cursos', '/#/cursos/node/actividades', '/#/lecciones', '/#/perfil']) {
+    for (const route of ['/', '/#/cursos', '/#/cursos/node/actividades', '/#/lecciones', '/#/perfil', '/#/cursos/javascript', '/#/cursos/javascript/unidades/variables', '/#/cursos/javascript/unidades/variables/lecciones/guardar-valores', '/#/cursos/javascript/unidades/variables/lecciones/guardar-valores/actividades']) {
       await page.goto(route)
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)

@@ -126,6 +126,39 @@ main:focus:not(:focus-visible), h2[tabindex]:focus:not(:focus-visible) { outline
 @media (max-width: 599px) {
   .course-grid { grid-template-columns: minmax(0, 1fr); gap: 22px; }.course-art { min-height: 145px; }.course-content p { min-height: 0; }
 }
+.learning-container { max-width: 1060px; padding-block: 28px 64px; }
+.learning-heading { margin-block: 28px; }
+.learning-heading h1 { font-size: clamp(2rem, 4vw, 3rem); }
+.learning-heading p { max-width: 760px; color: var(--muted); margin-top: 18px; font-size: 1rem; }
+.course-summary { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 24px 28px; color: var(--ink); background: #FFF2D3; border: 1px solid #EED79F; border-radius: 18px; }
+.course-summary strong { font-size: 1.2rem; }.course-summary p { margin-top: 5px; }
+.course-summary-mark { font: 800 2.6rem Consolas, monospace; }
+.learning-notice { margin-block: 20px 30px; font-size: .95rem; }
+.locked-notice { margin-bottom: 24px; border: 1px solid #EED79F; background: #FFF2D3; padding: 16px; border-radius: 12px; }
+.course-finished { display: flex; align-items: flex-start; gap: 14px; padding: 24px; background: #EBF6EE; border: 1px solid #A4D6B0; border-radius: 18px; margin-block: 24px; }
+.course-finished > .q-icon { flex-shrink: 0; color: var(--q-positive); }.course-finished h2 { font-size: 1.5rem; margin-bottom: 10px; }
+.units-list { display: grid; gap: 20px; }
+.unit-card { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; align-items: center; gap: 24px; padding: 28px; border-radius: 18px; border-color: var(--line); }
+.unit-symbol { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 16px; background: var(--lavender); color: var(--q-primary); }
+.unit-card--completed { border-color: #A4D6B0; }.unit-card--completed .unit-symbol { background: #EBF6EE; color: var(--q-positive); }
+.unit-card--locked .unit-symbol { background: #E9EAF2; color: var(--muted); }
+.unit-topline { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
+.unit-topline .eyebrow { font-size: .75rem; }.unit-state { display: inline-flex; gap: 6px; align-items: center; font-size: .875rem; }
+.unit-card-content h2 { font-size: 1.4rem; margin-bottom: 10px; }.unit-card-content p { color: var(--muted); font-size: 1rem; }
+.unit-card-content .unit-count { margin-block: 16px 8px; font-size: .875rem; }.unit-lock-note { margin-top: 10px; font-size: .875rem !important; }
+.lesson-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-top: 26px; }
+.lesson-card { padding: 28px; border-radius: 18px; border-color: var(--line); display: flex; align-items: flex-start; flex-direction: column; }
+.lesson-card .eyebrow { font-size: .75rem; }.lesson-card h2 { font-size: 1.5rem; margin-block: 14px; }.lesson-card > p { color: var(--muted); }
+.lesson-card .lesson-state { display: flex; align-items: center; gap: 8px; font-size: .875rem; margin-block: 22px; flex: 1; }.lesson-state .q-icon { flex-shrink: 0; }.lesson-card .q-btn { width: 100%; }
+.lesson-reading { padding: 32px; border-radius: 18px; border-color: var(--line); }.lesson-reading h2 { font-size: 1.6rem; margin-bottom: 20px; }.lesson-reading > p { font-size: 1rem; line-height: 1.85; margin-block: 14px; }.lesson-reading .scope-notice { font-size: .95rem; }
+.lesson-result-message { margin-top: 18px; padding: 16px; border-radius: 12px; background: var(--lavender); color: var(--ink); }
+.course-status, .practice-status { font-size: .875rem; }.course-content p { font-size: 1rem; }
+@media (max-width: 767px) {
+  .learning-container { padding-block: 20px 40px; }.course-summary { padding: 20px; }.course-summary-mark { font-size: 2rem; }
+  .unit-card { grid-template-columns: 44px minmax(0, 1fr); gap: 16px; padding: 20px; align-items: start; }.unit-symbol { width: 44px; height: 44px; border-radius: 12px; }
+  .unit-card > .q-btn { grid-column: 1 / -1; width: 100%; }.unit-topline { gap: 6px; }.unit-card-content h2 { font-size: 1.25rem; }
+  .lesson-list { grid-template-columns: 1fr; }.lesson-card, .lesson-reading { padding: 22px; }.lesson-reading > .q-btn { width: 100%; }
+}
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; } *, *::before, *::after { transition: none !important; animation: none !important; }
 }

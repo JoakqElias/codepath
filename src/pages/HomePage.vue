@@ -1,8 +1,8 @@
 <script setup>
 const steps = [
-  { number: '01', icon: 'auto_stories', title: 'Aprender', text: 'Leé una explicación breve antes de cada actividad. Los cursos organizados en unidades llegarán en próximas etapas.' },
+  { number: '01', icon: 'auto_stories', title: 'Aprender', text: 'Recorré cinco unidades de JavaScript con lecciones breves, ejemplos y actividades. También podés explorar otras tecnologías.' },
   { number: '02', icon: 'code', title: 'Practicar', text: 'Probá actividades introductorias de cada tecnología y recibí una corrección con su explicación al instante.' },
-  { number: '03', icon: 'trending_up', title: 'Progresar', text: 'Consultá el resultado de tu práctica actual. El guardado del progreso y los logros están previstos para más adelante.' }
+  { number: '03', icon: 'trending_up', title: 'Progresar', text: 'Aprobá las lecciones de JavaScript y desbloqueá nuevas unidades. El avance se mantiene al navegar y se reinicia al recargar.' }
 ]
 </script>
 
@@ -15,7 +15,7 @@ const steps = [
         <h1>Aprendé a programar,<br /><span>paso a paso</span></h1>
         <p class="lead">Un camino para quienes empiezan de cero. Explorá diferentes tecnologías y descubrí una propuesta de aprendizaje con lecciones cortas y dificultad progresiva.</p>
         <q-btn unelevated no-caps color="primary" class="hero-cta" label="Explorar cursos y tutoriales" icon-right="arrow_forward" to="/cursos" />
-        <p class="hero-note"><q-icon name="explore" size="18px" aria-hidden="true" /> Catálogo y prácticas disponibles. Cursos completos próximamente.</p>
+        <p class="hero-note"><q-icon name="explore" size="18px" aria-hidden="true" /> JavaScript con cinco unidades. Prácticas en nueve tecnologías.</p>
       </div>
       <div class="hero-visual" aria-label="Ilustración de una primera página web">
         <div class="visual-orbit orbit-one" aria-hidden="true"></div><div class="visual-orbit orbit-two" aria-hidden="true"></div>
@@ -39,7 +39,7 @@ const steps = [
     <section class="journey-section" aria-labelledby="journey-title">
       <div class="container">
         <div class="section-heading"><div><span class="eyebrow section-kicker">UN PASO A LA VEZ</span><h2 id="journey-title">Un recorrido pensado para vos</h2></div><span class="planned-label"><q-icon name="construction" size="17px" aria-hidden="true" /> En construcción</span></div>
-        <p class="section-intro">Hoy podés explorar y practicar. Estamos preparando un recorrido completo para acompañar cada nuevo aprendizaje.</p>
+        <p class="section-intro">Empezá el recorrido inicial de JavaScript o descubrí una tecnología con sus prácticas introductorias.</p>
         <div class="steps-grid">
           <q-card v-for="item in steps" :key="item.number" flat bordered class="step-card">
             <div class="step-top"><span class="step-icon"><q-icon :name="item.icon" size="27px" aria-hidden="true" /></span><span class="step-number" aria-hidden="true">{{ item.number }}</span></div>

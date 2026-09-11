@@ -14,7 +14,11 @@ Inicio, navegación adaptable, catálogo con nueve tarjetas reutilizables y **27
 
 Cursos y tutoriales: HTML, CSS, JavaScript, Tutorial de Vue.js, Tutorial de React, SQL, PHP, Java y Node.js.
 
-Los **cursos completos siguen como Próximamente**, con acceso deshabilitado. Las prácticas tienen su propio botón habilitado porque sí son funcionales. Lecciones y Perfil indican que están en desarrollo. No hay autenticación, backend, base de datos ni guardado de progreso. Salir de la práctica o recargar la página reinicia sus respuestas. Los ejemplos de código se muestran como texto y no se ejecutan.
+**JavaScript desde cero ya está disponible:** cinco unidades, diez lecciones y veinte actividades adicionales. El recorrido enseña variables y tipos, operadores, condicionales, bucles y funciones. Cada lección tiene explicación, ejemplo y dos ejercicios; requiere dos aciertos para aprobar. Las lecciones y unidades se desbloquean en orden. Hay **47 actividades en total**, contando las 27 prácticas introductorias.
+
+Los otros ocho cursos siguen como Próximamente, con acceso al curso deshabilitado y prácticas introductorias habilitadas. El índice general de Lecciones y Perfil siguen en desarrollo; las unidades y lecciones de JavaScript sí funcionan.
+
+El avance de JavaScript se mantiene **en memoria mientras navegás por la aplicación**. Se reinicia al recargar o cerrar la pestaña. Las prácticas sueltas reinician sus respuestas al salir y no completan unidades. No hay autenticación, backend, base de datos ni persistencia. Los ejemplos de código se muestran como texto y no se ejecutan.
 
 ## Instalación y ejecución
 
@@ -58,12 +62,13 @@ Playwright inicia el servidor local si no existe uno en 127.0.0.1:9000. Usa una 
 
 ## Organización
 
-- src/pages/: Inicio, Cursos, práctica y vistas en desarrollo.
-- src/components/: CourseCard y BrandLogo reutilizables.
+- src/pages/: Inicio, Cursos, JavaScriptCoursePage, UnitPage, LessonPage, práctica y vistas en desarrollo.
+- src/components/: CourseCard, UnitCard y BrandLogo reutilizables.
 - src/layouts/: estructura, encabezado, menú móvil y pie.
 - src/router/: rutas, títulos y vista de dirección desconocida.
-- src/data/: catálogo y actividades, separados de la presentación.
-- src/domain/: evaluación de respuestas y cálculo de resultados.
+- src/data/: catálogo, prácticas y javascriptCourse.js con unidades, lecciones y ejercicios.
+- src/domain/: evaluación, resultados y reglas de desbloqueo.
+- src/stores/: avance compartido en memoria, sin almacenamiento persistente.
 - src/css/: estilos globales y distribución adaptable.
 - public/: favicon SVG.
 - docs/: análisis, diseño, wireframes, contrato de datos y verificaciones.
@@ -76,10 +81,14 @@ Quasar CLI genera el punto de entrada desde src/App.vue. src/main.js se conserva
 
 - [Análisis, usuarios, alcance y vistas](docs/analisis.md).
 - [Identidad visual y decisiones de interfaz](docs/diseno.md).
+- [Manual de identidad visual en PDF (13 páginas)](output/pdf/CodePath_Identidad_Visual.pdf).
+- [Manual de identidad visual editable en Word](output/docx/CodePath_Identidad_Visual_Editables.docx).
+- [Logos SVG, especificaciones y regeneración del manual](docs/identidad/README.md).
 - [Wireframes de Inicio, escritorio y móvil](docs/wireframes/inicio.svg).
 - [Wireframes de Cursos, escritorio y móvil](docs/wireframes/cursos.svg).
 - [Formato de integración de cursos y actividades](docs/formato-cursos.md).
 - [Planificación de siguientes etapas](docs/planificacion.md).
 - [Verificaciones y pendientes](docs/verificaciones.md).
+- [Correspondencia con los 16 requisitos](docs/requisitos.md).
 
-La entrega es una SPA adaptable a celulares y computadoras. El empaquetado móvil nativo, el recorrido completo por unidades y la persistencia quedan para siguientes etapas.
+La entrega es una SPA adaptable a celulares y computadoras. El empaquetado móvil nativo, los recorridos de las otras ocho tecnologías y la persistencia quedan para siguientes etapas.

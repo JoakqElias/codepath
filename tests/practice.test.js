@@ -8,9 +8,9 @@ test('el catálogo contiene exactamente las nueve tecnologías con identificador
   assert.deepEqual(courses.map(course => course.id), ['html', 'css', 'javascript', 'vue', 'react', 'sql', 'php', 'java', 'node'])
   for (const course of courses) {
     assert.ok(course.name && course.description && course.visual.label && course.visual.caption)
-    assert.equal(course.status, 'coming-soon')
-    assert.equal(course.entryRoute, null)
-    assert.deepEqual(course.units, [])
+    assert.equal(course.status, course.id === 'javascript' ? 'available' : 'coming-soon')
+    assert.equal(course.entryRoute, course.id === 'javascript' ? '/cursos/javascript' : null)
+    assert.equal(course.units.length, course.id === 'javascript' ? 5 : 0)
     assert.equal('progress' in course, false)
   }
 })

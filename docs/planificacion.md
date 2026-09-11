@@ -2,13 +2,13 @@
 
 ## Etapa 1 — Entrega actual
 
-Análisis, identidad, wireframes, estructura Vue + Quasar, Inicio y Cursos. Ampliación solicitada: prácticas introductorias funcionales, tres por tecnología, con resultados temporales.
+Análisis, identidad, wireframes, estructura Vue + Quasar, Inicio y Cursos; tres prácticas introductorias por tecnología. Ampliación: curso de JavaScript con cinco unidades, diez lecciones y veinte ejercicios, eventos entre componentes, estados y avance real durante la sesión.
 
-## Etapa 2 — Primer recorrido completo
+## Etapa 2 — Ampliar los recorridos
 
-Priorizar HTML y CSS para construir una base web. Definir objetivos por unidad, escribir lecciones cortas, vincular actividades y añadir navegación entre unidades. Incorporar los aportes de otros equipos con el contrato común. Habilitar cursos individualmente cuando su contenido y recorrido estén verificados.
+El primer recorrido de JavaScript ya funciona. Continuar con HTML y CSS: definir objetivos, escribir lecciones y vincular actividades. Generalizar los selectores y rutas del recorrido para integrar los aportes de otros equipos con el contrato común. Habilitar cada curso cuando su contenido esté verificado.
 
-Cierre: un principiante puede iniciar y terminar el primer curso, con retroalimentación y sin enlaces vacíos.
+Cierre: un principiante puede completar más de un recorrido con retroalimentación y sin enlaces vacíos.
 
 ## Etapa 3 — Ejercicios y progreso
 

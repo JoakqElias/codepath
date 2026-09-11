@@ -34,7 +34,9 @@ Tarjetas blancas con bordes sutiles, esquinas de 18 a 20 px y espacios internos 
 
 Acciones principales: fondo violeta y texto blanco. Secundarias: borde y texto violeta. Las acciones pendientes están deshabilitadas y llevan candado y texto. Los botones principales tienen un mínimo de 48 px de alto; el acceso deshabilitado al curso completo tiene 44 px.
 
-No hay barras de avance en las tarjetas. En la práctica, la barra indica únicamente cuántas preguntas de esa sesión ya fueron respondidas.
+No hay barras de avance en las tarjetas del catálogo. UnitCard sí muestra la cantidad real de lecciones aprobadas en esa unidad y una barra proporcional. Disponible, Bloqueada y Completada se acompañan de texto e íconos. En la práctica, la barra indica cuántas preguntas del intento ya fueron respondidas.
+
+El recorrido de JavaScript utiliza tarjetas horizontales con número, ícono, título, descripción, estado y acceso. En móvil, el botón ocupa el ancho completo debajo del contenido. Las lecciones tienen una lectura breve, código monoespaciado y acceso a ejercicios. Los estados usan como mínimo 14 px; los textos principales de las nuevas vistas, 16 px.
 
 ## Accesibilidad y adaptación
 
@@ -57,3 +59,9 @@ Los bocetos muestran estructura en escala de grises antes de la identidad visual
 ![Wireframe de Cursos en escritorio y móvil](wireframes/cursos.svg)
 
 En móvil, las tarjetas siguen en una lista vertical; no se ocultan propuestas. Los wireframes incluyen el menú alternativo y diferencian el acceso a prácticas de los cursos completos pendientes.
+
+## Manual de identidad visual
+
+El [manual PDF de 13 páginas](../output/pdf/CodePath_Identidad_Visual.pdf) desarrolla la construcción del logo, variantes, reservas, tamaños mínimos, usos incorrectos, muestras tipográficas, jerarquía, colorimetría y contraste. Incluye valores HEX, RGB, HSL y aproximaciones CMYK; estas últimas requieren ajuste con el perfil de la imprenta para una producción física.
+
+Los [recursos de identidad](identidad/README.md) incluyen cuatro SVG con letras trazadas y el generador del manual. La referencia de la interfaz sigue siendo BrandLogo.vue, app.scss y la configuración de Quasar. Las reglas nuevas de reserva y tamaños impresos son pautas complementarias para futuras piezas.
