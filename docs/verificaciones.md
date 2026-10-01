@@ -1,6 +1,10 @@
 # Verificaciones y tareas pendientes
 
-Actualización: 11 de septiembre de 2026.
+**Ampliación del 1 de octubre:** [recorridos y avance por porcentajes](recorridos-progreso.md). Las cantidades y reglas que siguen son históricas.
+
+**Registro vigente de la segunda entrega:** [pruebas del 17 de septiembre](recorridos-progreso.md). Los resultados y cantidades que siguen son registros históricos de versiones anteriores.
+
+Actualización: 16 de septiembre de 2026. Las verificaciones históricas del 11 de septiembre se conservan debajo; la ampliación actual incorpora perfil persistente y actividades en ventanas. Las reglas vigentes están en [Perfil y actividades](perfil-y-actividades.md).
 
 ## Resultado de la entrega
 
@@ -16,7 +20,7 @@ Resultado: **correcto**, salida en dist/spa. Compilación realizada con las nuev
 
 Comando: npm.cmd test.
 
-**7 pruebas aprobadas**, sin fallos:
+**11 pruebas aprobadas**, sin fallos (las siete originales más cuatro de perfil):
 
 - Nueve propuestas con identificadores esperados, textos y representaciones; JavaScript disponible y ocho cursos pendientes, sin avances ficticios.
 - Veintisiete actividades, tres por tecnología, sin identificadores duplicados ni referencias a cursos inexistentes.
@@ -25,8 +29,25 @@ Comando: npm.cmd test.
 - Cinco unidades, diez lecciones, veinte actividades específicas y ausencia de colisiones entre los 47 identificadores de ejercicios. Corrección de las 60 opciones adicionales del recorrido.
 - Desbloqueo secuencial de las diez lecciones y transición Disponible → Completada de cada unidad.
 - Rechazo de respuestas incompletas, incorrectas, repetidas, ajenas o pertenecientes a una lección bloqueada. Los reintentos no duplican ni borran aprobaciones.
+- Habilidad ponderada por respuestas, XP y subida de nivel; racha estrictamente mayor al 40 %, mejor racha e interrupciones.
+- Respuestas y finalizaciones idempotentes; recuperación de JSON corrupto e intentos activos al recargar.
 
-## Pruebas de interfaz
+## Ampliación de perfil y ventana de actividades del 16 de septiembre
+
+Se verificaron los **23 escenarios de navegador** en Edge/Chromium en ejecuciones sucesivas: 11 escenarios de catálogo, prácticas y navegación; 6 comprobaciones de anchos, rutas y recorrido completo; y una ejecución final de 6 escenarios de perfil, foco y bloqueos. No se presenta como una única ejecución completa sin fallos: las primeras pasadas detectaron el foco al cerrar, una página de error incompatible con el diálogo y una espera faltante para su animación. Se corrigieron y se repitieron los escenarios afectados, con resultado aprobado.
+
+- Ventana sobre el catálogo con fondo gris desenfocado; fondo inerte, navegación con Tab contenida, Escape, confirmación de abandono y regreso del foco al disparador.
+- Sin desborde de página ni del contenido del diálogo a 320, 390, 768 y 1440 px.
+- Perfil vacío sin porcentajes ficticios, edición de nombre y avatar, habilidad general y por tecnología, XP, subida de nivel, racha, mejor racha e historial.
+- Racha que aumenta con prácticas suficientes y se reinicia al fallar o abandonar. Las respuestas erróneas se conservan; resultados y XP no se duplican por cerrar o recargar.
+- Persistencia de identidad, porcentajes y racha después de recargar; las diez lecciones de JavaScript también permanecen completadas.
+- Reintentos, desbloqueo secuencial, acceso directo a rutas e identificadores desconocidos.
+- Recuperación ante almacenamiento corrupto y aviso al impedir el navegador guardar datos.
+- Revisión de capturas del diálogo y el perfil en escritorio y móvil. El servidor de desarrollo emitió avisos de ResizeObserver durante algunos cambios de distribución; no impidieron las comprobaciones ni aparecieron excepciones de aplicación en los recorridos que las registran.
+
+Las pruebas nuevas están en tests/profile.test.js y tests/e2e/profile.spec.js. Las capturas de esta ampliación se generan en test-results/modal-{escritorio,movil}.png y test-results/perfil-{escritorio,movil}.png. El detalle de las reglas está en docs/perfil-y-actividades.md.
+
+## Pruebas de interfaz de la entrega del 11 de septiembre
 
 Comando: npm.cmd run test:e2e, con PLAYWRIGHT_CHANNEL=msedge.
 
@@ -96,7 +117,7 @@ Estas combinaciones superan 4,5:1 para texto normal. Los estados también tienen
 
 - Ampliar JavaScript con temas avanzados y desarrollar los recorridos de las otras ocho tecnologías. Ya existen cinco unidades funcionales de JavaScript y tres prácticas introductorias por tecnología.
 - Agregar más formatos de ejercicio; no se ejecuta código escrito por el usuario.
-- Incorporar persistencia entre sesiones, historial, logros y Perfil funcional. El avance durante la navegación ya funciona en memoria.
+- Ampliar el perfil local con insignias, reinicio explícito del progreso, migraciones y sincronización entre dispositivos. Persistencia local, niveles, habilidad, rachas e historial ya funcionan en la ampliación del 16 de septiembre.
 - Definir autenticación, backend y base de datos cuando el alcance lo requiera.
 - Revisar el contenido con el docente y probarlo con estudiantes principiantes.
 - Probar en celulares físicos, Safari, Firefox y lectores de pantalla; las pruebas actuales usan Edge/Chromium con tamaños de viewport.

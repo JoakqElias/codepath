@@ -17,7 +17,7 @@ const visualLabel = computed(() => props.course.visual?.label || props.course.na
       <span class="eyebrow">{{ course.category }}</span>
       <h2 :id="'course-' + course.id">{{ course.name }}</h2>
       <p>{{ course.description }}</p>
-      <span class="course-status"><q-icon :name="available ? 'check_circle' : 'schedule'" size="17px" aria-hidden="true" /> {{ available ? 'Curso inicial disponible · ' + course.units.length + ' unidades' : 'Curso completo: Próximamente' }}</span>
+      <span class="course-status"><q-icon :name="available ? 'check_circle' : 'schedule'" size="17px" aria-hidden="true" /> {{ available ? 'Recorrido inicial · ' + course.units.reduce((total, unit) => total + unit.lessons.length, 0) + ' lecciones' : 'Curso completo: Próximamente' }}</span>
       <span v-if="practiceCount" class="practice-status"><q-icon name="task_alt" size="17px" aria-hidden="true" /> {{ practiceCount }} actividades introductorias disponibles</span>
     </q-card-section>
     <q-card-actions class="course-actions">
@@ -25,7 +25,7 @@ const visualLabel = computed(() => props.course.visual?.label || props.course.na
         :aria-label="'Ver unidades de ' + course.name" @click="select('course')" />
       <q-btn v-if="practiceCount" :outline="available" :unelevated="!available" no-caps class="full-width" color="primary"
         @click="select('practice')" label="Probar actividades" icon-right="arrow_forward"
-        :aria-label="'Probar actividades de ' + course.name" />
+        :aria-label="'Probar actividades de ' + course.name" :data-practice-trigger="course.id" />
       <q-btn v-if="!available" flat no-caps disable class="full-width course-access" color="primary" icon="lock_outline"
         label="Curso completo · Próximamente" :aria-label="'Curso completo de ' + course.name + ': Próximamente'" />
     </q-card-actions>

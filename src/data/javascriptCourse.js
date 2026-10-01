@@ -1,43 +1,37 @@
-// Curso inicial: cinco unidades, dos lecciones por unidad y dos ejercicios por lección.
-// Mismo contrato de opción única que las prácticas introductorias.
-const question = (id, question, labels, answer, explanation, code) => ({
-  id, question, options: labels.map((label, i) => ({ id: String.fromCharCode(97 + i), label })),
-  answerId: String.fromCharCode(97 + answer), explanation, code
-})
-const lesson = (id, title, description, content, code, questions) => ({
-  id, title, description, content, code,
-  activities: questions.map(item => ({
-    ...item, courseId: 'javascript', lessonId: id, type: 'single-choice',
-    title: item.question, concept: content.join(' '), code: item.code || code
-  }))
-})
+// Diez lecciones, cuatro actividades por lección.
+import { question, makeLesson } from './contentFactory.js'
+import { javascriptExtras } from './javascriptExtras.js'
+const lesson = (id, title, description, content, code, questions) =>
+  makeLesson('javascript', id, title, description, content, code, [...questions, ...javascriptExtras[id]])
 
 export const javascriptUnits = [
   {
     id: 'variables', title: 'Variables y tipos de datos',
     description: 'Guardá información y distinguí números, textos y valores lógicos.',
-    status: 'available', icon: 'inventory_2',
+    icon: 'inventory_2',
     lessons: [
       lesson('guardar-valores', 'Guardá tus primeros valores', 'Conocé let y const.',
         ['JavaScript permite escribir instrucciones para trabajar con información. Una variable tiene un nombre y un valor.',
           'let permite reasignar el valor; const impide reasignarlo. Usamos console.log para mostrarlo. Las instrucciones de estos ejemplos se leen de arriba hacia abajo.'],
         'let puntos = 1;\npuntos = 3;\nconst nombre = "Ana";\nconsole.log(puntos);', [
           question('js-let', '¿Qué valor muestra console.log(puntos)?', ['1', '3', 'Ana'], 1, 'puntos empezó en 1, pero la segunda instrucción lo reasignó a 3.'),
-          question('js-const', '¿Qué declaración elegirías para un valor que no vas a reasignar?', ['const', 'let', 'console.log'], 0, 'const declara una variable que no se puede reasignar. Esto no hace inmutables los objetos, tema de una etapa posterior.')
+          question('js-const', '¿Qué declaración elegirías para un valor que no vas a reasignar?', ['const', 'let', 'console.log'], 0, 'const declara una variable que no se puede reasignar. Esto no hace inmutables los objetos, tema de una etapa posterior.'),
+          question('js-log-name', '¿Qué instrucción muestra el valor guardado en nombre?', ['console.log(nombre);', 'let nombre;', 'console.log(puntos);'], 0, 'console.log(nombre) muestra el valor de esa variable: Ana. Declarar una variable no muestra su contenido.')
         ]),
       lesson('tipos-datos', 'Números, textos y booleanos', 'Reconocé el tipo de cada valor.',
         ['Los números se escriben sin comillas. Las cadenas de texto usan comillas y los booleanos son true o false.',
           'typeof permite consultar el tipo de un valor. Un número entre comillas es texto, aunque se vea como una cantidad.'],
         'const edad = 18;\nconst nombre = "Luz";\nconst activo = true;\nconsole.log(typeof edad);', [
           question('js-type-number', '¿Qué devuelve typeof edad?', ['"string"', '"boolean"', '"number"'], 2, '18 no tiene comillas y es un número. typeof edad devuelve la cadena "number".'),
-          question('js-type-boolean', '¿Cuál de estos valores es booleano?', ['"true"', 'true', '18'], 1, 'true sin comillas es un booleano. "true" entre comillas es texto.')
+          question('js-type-boolean', '¿Cuál de estos valores es booleano?', ['"true"', 'true', '18'], 1, 'true sin comillas es un booleano. "true" entre comillas es texto.'),
+          question('js-type-string', '¿Qué devuelve typeof "18"?', ['"number"', '"string"', '"boolean"'], 1, 'Las comillas convierten "18" en una cadena de texto. Por eso typeof devuelve "string", aunque sus caracteres sean dígitos.')
         ])
     ]
   },
   {
     id: 'operadores', title: 'Operadores y expresiones',
     description: 'Calculá resultados y compará valores para formar condiciones.',
-    status: 'locked', icon: 'calculate',
+    icon: 'calculate',
     lessons: [
       lesson('calculos', 'Hacé tus primeros cálculos', 'Sumá, multiplicá y agrupá operaciones.',
         ['Los operadores +, -, * y / permiten sumar, restar, multiplicar y dividir números.',
@@ -58,7 +52,7 @@ export const javascriptUnits = [
   {
     id: 'condicionales', title: 'Condicionales',
     description: 'Elegí qué instrucciones ejecutar según lo que ocurra.',
-    status: 'locked', icon: 'call_split',
+    icon: 'call_split',
     lessons: [
       lesson('if-else', 'Elegí entre dos caminos', 'Tomá decisiones con if y else.',
         ['if ejecuta un bloque cuando la condición es verdadera. else ofrece una alternativa si es falsa.',
@@ -79,7 +73,7 @@ export const javascriptUnits = [
   {
     id: 'bucles', title: 'Bucles',
     description: 'Repetí instrucciones con un contador y una condición de salida.',
-    status: 'locked', icon: 'repeat',
+    icon: 'repeat',
     lessons: [
       lesson('bucle-for', 'Repetí con for', 'Controlá el inicio, la condición y el incremento.',
         ['for agrupa un inicio, una condición y una actualización. Antes de cada vuelta comprueba la condición.',
@@ -100,7 +94,7 @@ export const javascriptUnits = [
   {
     id: 'funciones', title: 'Funciones',
     description: 'Organizá instrucciones reutilizables con parámetros y retornos.',
-    status: 'locked', icon: 'functions',
+    icon: 'functions',
     lessons: [
       lesson('parametros', 'Pasá información a una función', 'Definí parámetros y llamá a una función.',
         ['Una función agrupa instrucciones con un nombre. Declararla prepara ese bloque; una llamada lo ejecuta.',
@@ -120,6 +114,14 @@ export const javascriptUnits = [
   }
 ]
 
+// La publicación pertenece al contenido; disponible/bloqueada se deriva del participante.
+for (const [unitIndex, unit] of javascriptUnits.entries()) {
+  Object.assign(unit, { courseId: 'javascript', position: unitIndex + 1, publicationStatus: 'published' })
+  for (const [lessonIndex, item] of unit.lessons.entries()) {
+    Object.assign(item, { unitId: unit.id, position: lessonIndex + 1, publicationStatus: 'published' })
+    item.activities.forEach((activity, i) => Object.assign(activity, { position: i + 1, publicationStatus: 'published' }))
+  }
+}
 export const javascriptLessons = javascriptUnits.flatMap(unit => unit.lessons)
 export const javascriptActivities = javascriptLessons.flatMap(lesson => lesson.activities)
 export const findUnit = id => javascriptUnits.find(unit => unit.id === id)

@@ -13,19 +13,20 @@ test('inicio, catálogo, paleta real de Quasar y enlaces de escritorio', async (
   await page.screenshot({ path: 'test-results/inicio-escritorio.png', fullPage: true })
   await page.getByRole('link', { name: 'Explorar cursos y tutoriales' }).click()
   await expect(page.getByRole('article')).toHaveCount(9)
-  await expect(page.getByRole('button', { name: /Curso completo de .*Próximamente/ })).toHaveCount(8)
+  await expect(page.getByRole('button', { name: /^Ver unidades de / })).toHaveCount(9)
   for (const course of courses) {
     const card = page.getByRole('article', { name: course.name, exact: true })
     if (course.status === 'coming-soon') await expect(card.getByRole('button', { name: /Curso completo/ })).toBeDisabled()
     await card.getByRole('button', { name: 'Probar actividades de ' + course.name, exact: true }).click()
     await expect(page).toHaveURL(new RegExp('/cursos/' + course.id + '/actividades$'))
-    await page.getByRole('link', { name: 'Volver al catálogo' }).click()
+    await page.getByRole('button', { name: 'Cerrar actividad' }).click()
   }
   await page.screenshot({ path: 'test-results/cursos-escritorio.png', fullPage: true })
   await page.getByRole('navigation', { name: 'Navegación principal' }).getByRole('link', { name: 'Lecciones' }).click()
-  await expect(page.getByText('EN DESARROLLO', { exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Unidades y lecciones', exact: true })).toBeVisible()
+  await expect(page.locator('.lessons-index .q-expansion-item')).toHaveCount(9)
   await page.getByRole('navigation', { name: 'Navegación principal' }).getByRole('link', { name: 'Perfil' }).click()
-  await expect(page.getByText(/Esta entrega no tiene cuentas ni guarda avances/)).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Tu perfil', exact: true })).toBeVisible()
   expect(errors).toEqual([])
 })
 
@@ -35,7 +36,7 @@ for (const course of courses) {
     const activities = activitiesForCourse(course.id)
     await expect(page.getByRole('button', { name: 'Comprobar respuesta' })).toBeDisabled()
     for (const [index, activity] of activities.entries()) {
-      await expect(page.getByRole('heading', { level: 2, name: activity.title })).toBeVisible()
+      await expect(page.getByRole('heading', { level: 2, name: activity.question })).toBeVisible()
       // Primera respuesta incorrecta; las otras dos correctas: resultado esperado 2/3.
       const answer = activity.options.find(option => index === 0 ? option.id !== activity.answerId : option.id === activity.answerId)
       await page.getByRole('radio', { name: answer.label, exact: true }).click()
@@ -55,7 +56,7 @@ for (const course of courses) {
   })
 }
 
-test('navegación móvil accesible, foco y sin progreso persistido', async ({ page }) => {
+test('navegación móvil accesible y práctica reiniciada con estadísticas conservadas', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/')
   await page.screenshot({ path: 'test-results/inicio-movil.png', fullPage: true })
@@ -81,7 +82,9 @@ test('navegación móvil accesible, foco y sin progreso persistido', async ({ pa
   await page.reload()
   await expect(page.getByText('0 respondidas', { exact: true })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Comprobar respuesta' })).toBeDisabled()
-  for (const [name, title] of [['Lecciones', 'Unidades y lecciones'], ['Perfil', 'Tu perfil, próximamente'], ['Inicio', 'Aprendé a programar,paso a paso']]) {
+  await expect(page.locator('.practice-live-stats')).toContainText('10 XP')
+  await page.getByRole('button', { name: 'Cerrar actividad' }).click()
+  for (const [name, title] of [['Lecciones', 'Unidades y lecciones'], ['Perfil', 'Tu perfil'], ['Inicio', 'Aprendé a programar,paso a paso']]) {
     await page.getByRole('button', { name: 'Menú', exact: true }).click()
     await nav.getByRole('link', { name, exact: true }).click()
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(title)
@@ -93,8 +96,10 @@ for (const width of [320, 390, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 })
     for (const route of ['/', '/#/cursos', '/#/cursos/node/actividades', '/#/lecciones', '/#/perfil', '/#/cursos/javascript', '/#/cursos/javascript/unidades/variables', '/#/cursos/javascript/unidades/variables/lecciones/guardar-valores', '/#/cursos/javascript/unidades/variables/lecciones/guardar-valores/actividades']) {
       await page.goto(route)
+      if (!route.endsWith('/actividades')) await expect(page.getByRole('dialog')).toBeHidden()
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+      if (route.endsWith('/actividades')) expect(await page.locator('.practice-modal').evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true)
     }
     await page.goto('/#/cursos')
     const columns = await page.locator('.course-grid').evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length)
@@ -111,6 +116,6 @@ test('rutas inexistentes y cambio entre tecnologías no conservan respuestas aje
   await page.getByRole('radio', { name: '<h1>', exact: true }).click()
   await page.getByRole('button', { name: 'Comprobar respuesta' }).click()
   await page.evaluate(() => { window.location.hash = '/cursos/css/actividades' })
-  await expect(page.getByRole('heading', { name: 'Un poco de color' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: activitiesForCourse('css')[0].question })).toBeVisible()
   await expect(page.getByText('0 respondidas', { exact: true })).toBeVisible()
 })

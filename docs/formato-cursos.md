@@ -48,7 +48,7 @@ CourseCard emite seleccionar con { courseId, destination: 'course' | 'practice' 
 
 Cada actividad tiene id globalmente único y courseId existente. Las opciones deben tener identificadores únicos dentro de la pregunta y exactamente una debe coincidir con answerId. Todos los campos explicativos son obligatorios. Solo se admite single-choice en esta entrega.
 
-activitiesForCourse(id) entrega las tres preguntas introductorias de una tecnología, en orden editorial. CoursesPage pasa su cantidad a CourseCard. Las veinte actividades del recorrido están en las lecciones de javascriptCourse.js; javascriptActivities permite recorrerlas en una colección plana. Ambos grupos usan el mismo contrato y el mismo evaluador, con identificadores globalmente únicos.
+activitiesForCourse(id) entrega las tres preguntas introductorias de una tecnología, en orden editorial. CoursesPage pasa su cantidad a CourseCard. Las 104 actividades de los recorridos están en javascriptCourse.js, javascriptExtras.js y technologyCourses.js; javascriptActivities permite recorrerlas en una colección plana. Ambos grupos usan el mismo contrato y el mismo evaluador, con identificadores globalmente únicos.
 
 Los ejemplos y alternativas se muestran mediante interpolación de texto. No usar v-html, eval ni ejecución de código aportado por cursos. Esta práctica es pedagógica, sin calificación oficial: la solución está en el cliente.
 
@@ -89,6 +89,16 @@ El orden es el de las colecciones. UnitPage y LessonPage presentan esos datos. P
 
 Estado visible de unidad: available (Disponible), locked (Bloqueada) o completed (Completada). Se calcula desde las lecciones aprobadas: todas las unidades anteriores deben estar completas; dentro de una unidad deben aprobarse las lecciones anteriores. Una lección se aprueba únicamente si se respondieron todas sus actividades correctamente. Reintentar no duplica ni borra aprobaciones.
 
-src/stores/learningProgress.js conserva los identificadores aprobados en un ref compartido y de lectura pública. No utiliza localStorage, sessionStorage ni servicios externos. Al recargar se pierde el avance. Un guard global de Vue Router también verifica el acceso cuando se pega una dirección o cambian sus parámetros. Son reglas pedagógicas del cliente, no un sistema de evaluación con protección contra manipulación.
+src/stores/learningProgress.js expone los identificadores aprobados del perfil local de solo lectura. src/stores/userProfile.js guarda perfil, respuestas y lecciones aprobadas en localStorage bajo codepath.profile.v1. Al recargar se conserva el avance; los intentos abiertos se marcan como interrumpidos. Un guard global de Vue Router verifica el acceso cuando se pega una dirección o cambian sus parámetros. Son reglas pedagógicas del cliente, no un sistema de evaluación con protección contra manipulación. Ver docs/perfil-y-actividades.md.
 
 Para incorporar recorridos de otros equipos, usar estos formatos y ampliar el acceso a cursos, los selectores de contenido y las rutas; por ahora el recorrido secuencial se conecta específicamente a JavaScript. La persistencia futura deberá guardar identificadores estables y versión de contenido.
+
+## Acceso centralizado · segunda entrega
+
+Las pantallas y rutas leen exclusivamente `src/services/contentRepository.js`; no importan los archivos de datos. El módulo ofrece `getCourses`, `getCourse`, `getUnits`, `findUnit`, `getLessons`, `findLesson`, `getActivities` y `activitiesForCourse`. Los identificadores desconocidos producen colecciones vacías o `undefined`. Es un adaptador síncrono de prueba; el acceso remoto futuro deberá incorporar asincronía y estados de carga/error.
+
+Unidades: `courseId`, `position`, `publicationStatus`. Lecciones: `unitId`, `position`, `publicationStatus`. Preguntas: `lessonId`, `position`, `publicationStatus`, `answerId`; opciones: `id`, `questionId`, `label`. Los IDs de opciones del recorrido son globales, por ejemplo `js-let-op-2`. La publicación no usa el estado de avance del usuario. Ver [modelo de contenido](recorridos-progreso.md) y [reglas vigentes](recorridos-progreso.md).
+
+## Mejor marca y finalización
+
+`completedLessons` habilita el avance; `lessonScores[lessonId]` almacena el máximo porcentaje de un intento completo. La publicación sigue separada del avance. Las rutas y vistas reciben `courseId` y no asumen JavaScript. `contentFactory.js` normaliza identificadores y relaciones. Cada lección publicada actual tiene cuatro preguntas.

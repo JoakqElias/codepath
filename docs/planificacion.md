@@ -2,7 +2,7 @@
 
 ## Etapa 1 — Entrega actual
 
-Análisis, identidad, wireframes, estructura Vue + Quasar, Inicio y Cursos; tres prácticas introductorias por tecnología. Ampliación: curso de JavaScript con cinco unidades, diez lecciones y veinte ejercicios, eventos entre componentes, estados y avance real durante la sesión.
+Análisis, identidad, wireframes, estructura Vue + Quasar, Inicio y Cursos; tres prácticas introductorias por tecnología. Ampliación: curso de JavaScript con recorridos en las nueve tecnologías, 26 lecciones y 104 ejercicios, eventos entre componentes, estados y avance real durante la sesión.
 
 ## Etapa 2 — Ampliar los recorridos
 
@@ -12,7 +12,7 @@ Cierre: un principiante puede completar más de un recorrido con retroalimentaci
 
 ## Etapa 3 — Ejercicios y progreso
 
-Añadir otros tipos de ejercicio, revisiones pedagógicas y persistencia local versionada. Definir qué pasa al reintentar, editar contenidos o borrar progreso. Ampliar resultados y Perfil con datos reales.
+La persistencia local versionada, el perfil, los niveles, la habilidad y las rachas ya están implementados. Añadir otros tipos de ejercicio, revisiones pedagógicas, migraciones al editar contenidos y una opción explícita para borrar progreso con confirmación. Evaluar insignias e historial ampliado.
 
 Cierre: recargar o volver después recupera un avance consistente; el usuario puede reiniciarlo y entiende qué se guarda.
 
@@ -25,3 +25,5 @@ Cierre: pruebas reales en celulares, contenido revisado y despliegue o distribuc
 ## Pendientes transversales
 
 Revisión docente de ejercicios; auditoría con lector de pantalla; pruebas en dispositivos físicos, Safari y Firefox; mantenimiento de dependencias; documentación de cambios; evaluación de nuevos contenidos y métricas de aprendizaje.
+
+Actualización del 1 de octubre: ya hay recorridos iniciales en todas las tecnologías. Las próximas ampliaciones agregan nuevas unidades, no parten de cursos vacíos. [Reglas vigentes](recorridos-progreso.md).

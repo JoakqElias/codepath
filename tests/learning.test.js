@@ -7,19 +7,20 @@ import { evaluateAnswer } from '../src/domain/practice.js'
 
 const rightAnswers = lesson => lesson.activities.map(activity => evaluateAnswer(activity, activity.answerId))
 
-test('cinco unidades, diez lecciones y veinte ejercicios con referencias y soluciones válidas', () => {
+test('cinco unidades, diez lecciones y cuarenta ejercicios con referencias y soluciones válidas', () => {
   assert.equal(units.length, 5)
   assert.equal(javascriptLessons.length, 10)
-  assert.equal(javascriptActivities.length, 20)
-  assert.equal(new Set([...introActivities, ...javascriptActivities].map(item => item.id)).size, 47)
+  assert.equal(javascriptActivities.length, 40)
+  assert.equal(new Set([...introActivities, ...javascriptActivities].map(item => item.id)).size, 67)
   assert.equal(new Set(javascriptLessons.map(item => item.id)).size, 10)
   assert.equal(new Set(units.map(item => item.id)).size, 5)
   for (const [index, unit] of units.entries()) {
     assert.ok(unit.title && unit.description && unit.icon)
-    assert.equal(unit.status, index === 0 ? 'available' : 'locked')
+    assert.equal(unit.publicationStatus, 'published')
+    assert.equal(unit.courseId, 'javascript')
     for (const lesson of unit.lessons) {
       assert.ok(lesson.title && lesson.content.length && lesson.code && lesson.description)
-      assert.equal(lesson.activities.length, 2)
+      assert.equal(lesson.activities.length, 4)
       for (const activity of lesson.activities) {
         assert.equal(activity.lessonId, lesson.id)
         assert.equal(activity.courseId, 'javascript')

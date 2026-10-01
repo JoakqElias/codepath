@@ -1,9 +1,10 @@
+import { technologyUnits } from './technologyCourses.js'
 import { javascriptUnits } from './javascriptCourse.js'
 
 // Formato común de integración: docs/formato-cursos.md.
 const course = (id, name, description, label, caption, category) => ({
-  id, name, description, visual: { label, caption }, category,
-  status: 'coming-soon', entryRoute: null, units: []
+  id, name, description, publicationStatus: 'published', visual: { label, caption }, category,
+  status: 'available', entryRoute: '/cursos/' + id, units: technologyUnits[id] || []
 })
 
 export const courses = [

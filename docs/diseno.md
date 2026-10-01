@@ -62,6 +62,8 @@ En móvil, las tarjetas siguen en una lista vertical; no se ocultan propuestas. 
 
 ## Manual de identidad visual
 
+La ampliación del 16 de septiembre mantiene la paleta y agrega actividades en una ventana con velo gris y desenfoque de 8 px sobre la página, bordes redondeados y sombra suave. El cierre permanece visible al desplazar el contenido; en móvil se conserva un margen para reconocer el contexto. Perfil reúne una identidad editable, tarjetas de habilidad y racha, barras por tecnología e historial. Los estados incluyen texto e iconos. Ver [reglas y alcance](perfil-y-actividades.md).
+
 El [manual PDF de 13 páginas](../output/pdf/CodePath_Identidad_Visual.pdf) desarrolla la construcción del logo, variantes, reservas, tamaños mínimos, usos incorrectos, muestras tipográficas, jerarquía, colorimetría y contraste. Incluye valores HEX, RGB, HSL y aproximaciones CMYK; estas últimas requieren ajuste con el perfil de la imprenta para una producción física.
 
 Los [recursos de identidad](identidad/README.md) incluyen cuatro SVG con letras trazadas y el generador del manual. La referencia de la interfaz sigue siendo BrandLogo.vue, app.scss y la configuración de Quasar. Las reglas nuevas de reserva y tamaños impresos son pautas complementarias para futuras piezas.

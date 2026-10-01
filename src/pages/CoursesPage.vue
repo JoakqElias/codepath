@@ -1,8 +1,9 @@
 <script setup>
 import CourseCard from '../components/CourseCard.vue'
-import { courses } from '../data/courses'
-import { activitiesForCourse } from '../data/activities'
+import { getCourses } from '../services/contentRepository.js'
+import { activitiesForCourse } from '../services/contentRepository.js'
 import { useRouter } from 'vue-router'
+const courses = getCourses()
 
 const router = useRouter()
 function selectCourse ({ courseId, destination }) {
@@ -23,7 +24,7 @@ function selectCourse ({ courseId, destination }) {
       </div>
       <div class="scope-notice" role="note">
         <q-icon name="construction" size="25px" aria-hidden="true" />
-        <div><strong>JavaScript ya tiene un recorrido de cinco unidades.</strong><span> Las otras tecnologías ofrecen prácticas introductorias mientras se preparan sus cursos. El avance del recorrido se mantiene al navegar y se reinicia al recargar.</span></div>
+        <div><strong>Las nueve tecnologías ya tienen lecciones y actividades.</strong><span> JavaScript ofrece diez lecciones y las otras tecnologías, dos lecciones iniciales cada una. Terminá para avanzar y repetí para llegar al 100 %.</span></div>
       </div>
       <div class="catalog-label"><h2>Todos los cursos y tutoriales</h2><span>{{ courses.length }} propuestas · Nivel inicial</span></div>
       <div class="course-grid"><CourseCard v-for="course in courses" :key="course.id" :course="course" :practice-count="activitiesForCourse(course.id).length" @seleccionar="selectCourse" /></div>
