@@ -9,9 +9,6 @@ import LessonsPage from '../pages/LessonsPage.vue'
 import UnitPage from '../pages/UnitPage.vue'
 import LessonPage from '../pages/LessonPage.vue'
 import ProfilePage from '../pages/ProfilePage.vue'
-import { findUnit, findLesson, getUnits } from '../services/contentRepository.js'
-import { unitState, canOpenLesson } from '../domain/learning.js'
-import { learningProgress } from '../stores/learningProgress.js'
 
 const routes = [{
   path: '/', component: MainLayout,
@@ -45,18 +42,8 @@ const router = createRouter({
     return saved || { top: 0 }
   }
 })
-// La protección también se aplica al pegar una URL o cambiar sus parámetros.
-router.beforeEach(to => {
-  if (!to.meta.learning) return
-  const units = getUnits(to.params.courseId)
-  const unit = findUnit(to.params.unitId, to.params.courseId)
-  if (!unit) return
-  const lesson = findLesson(to.params.unitId, to.params.lessonId, to.params.courseId)
-  if (unitState(units, unit.id, learningProgress.value) === 'locked' ||
-      (lesson && !canOpenLesson(units, unit.id, lesson.id, learningProgress.value))) {
-    return { name: 'course', params: { courseId: to.params.courseId }, query: { bloqueada: '1' } }
-  }
-})
+// Cada vista comprueba pertenencia y avance después de cargar; un fallo de red
+// debe permitir reintentar en la misma pantalla, sin bloquear la navegación.
 router.afterEach((to) => {
   document.title = (to.meta.title || 'Aprendé a programar') + ' | CodePath'
 })

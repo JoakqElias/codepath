@@ -1,13 +1,11 @@
 import { computed } from 'vue'
-import { getUnits } from '../services/contentRepository.js'
 import { lessonResult, recordLessonResult, recordLessonCompletion, recordBestScore } from '../domain/learning.js'
 import { userProfile, saveLessonProgress } from './userProfile.js'
 export const completedLessons = computed(() => userProfile.value.completedLessons)
 // Las guardas usan finalización, no perfección.
 export const learningProgress = completedLessons
 export const lessonScores = computed(() => userProfile.value.lessonScores)
-export function completeLesson (unitId, lessonId, answers, courseId = 'javascript') {
-  const units = getUnits(courseId)
+export function completeLesson (units, unitId, lessonId, answers) {
   const result = lessonResult(units, unitId, lessonId, answers, completedLessons.value)
   if (!result) return
   saveLessonProgress(

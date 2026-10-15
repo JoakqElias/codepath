@@ -1,16 +1,19 @@
 <script setup>
 import CourseCard from '../components/CourseCard.vue'
 import { getCourses } from '../services/contentRepository.js'
-import { activitiesForCourse } from '../services/contentRepository.js'
+import { computed } from 'vue'
+import { useContent } from '../composables/useContent.js'
+import ContentState from '../components/ContentState.vue'
 import { useRouter } from 'vue-router'
-const courses = getCourses()
+const { data, loading, error, retry } = useContent(() => [], getCourses)
+const courses = computed(() => data.value || [])
 
 const router = useRouter()
 function selectCourse ({ courseId, destination }) {
-  const course = courses.find(item => item.id === courseId)
+  const course = courses.value.find(item => item.id === courseId)
   if (!course) return
   if (destination === 'course' && course.status === 'available' && course.entryRoute) router.push(course.entryRoute)
-  if (destination === 'practice' && activitiesForCourse(courseId).length) router.push({ name: 'practice', params: { courseId } })
+  if (destination === 'practice') router.push({ name: 'practice', params: { courseId } })
 }
 </script>
 
@@ -24,10 +27,15 @@ function selectCourse ({ courseId, destination }) {
       </div>
       <div class="scope-notice" role="note">
         <q-icon name="construction" size="25px" aria-hidden="true" />
-        <div><strong>Las nueve tecnologías ya tienen lecciones y actividades.</strong><span> JavaScript ofrece diez lecciones y las otras tecnologías, dos lecciones iniciales cada una. Terminá para avanzar y repetí para llegar al 100 %.</span></div>
+        <div><strong>Contenidos publicados por el equipo.</strong><span> Las unidades en preparación se identifican como no disponibles. Terminá cada lección publicada para avanzar.</span></div>
       </div>
       <div class="catalog-label"><h2>Todos los cursos y tutoriales</h2><span>{{ courses.length }} propuestas · Nivel inicial</span></div>
-      <div class="course-grid"><CourseCard v-for="course in courses" :key="course.id" :course="course" :practice-count="activitiesForCourse(course.id).length" @seleccionar="selectCourse" /></div>
+      <ContentState :loading="loading" :error="error" @retry="retry" />
+      <template v-if="!loading && !error">
+        <p v-if="!courses.length" role="status">No hay cursos disponibles en este momento.</p>
+        <div v-else class="course-grid"><CourseCard v-for="course in courses" :key="course.id" :course="course" @seleccionar="selectCourse" /></div>
+        <q-btn flat no-caps color="primary" label="Volver a consultar" @click="retry" />
+      </template>
       <p class="catalog-footnote"><q-icon name="info_outline" size="18px" aria-hidden="true" /> Empezá desde cero: cada actividad incluye una explicación breve antes de responder.</p>
     </section>
   </q-page>

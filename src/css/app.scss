@@ -274,3 +274,6 @@ main:focus:not(:focus-visible), h2[tabindex]:focus:not(:focus-visible) { outline
 .lesson-best-score { color:var(--q-primary); font-size:1.05rem; font-weight:700; margin-top:12px; }
 .lessons-index { background:white; border-radius:18px; overflow:hidden; }.lessons-index .q-item { min-height:72px; }.lessons-index-unit { padding:12px 20px; }.lessons-index-unit h2 { font-size:1.1rem; margin-bottom:10px; }.lessons-index-row { display:flex; align-items:center; justify-content:space-between; gap:12px; border-top:1px solid var(--line); padding-block:4px; }.lessons-index-row .q-btn { min-height:44px; }.lessons-index-row > span { font-size:.8rem; flex-shrink:0; color:var(--muted); }
 @media(max-width:599px) { .lessons-index-row { align-items:flex-start; flex-direction:column; gap:0; }.lessons-index-row > span { padding:0 16px 10px; } }
+.content-state { padding: 32px 24px; text-align: center; }
+.content-state h2 { font-size: 1.25rem; }
+.check-error { padding: 12px; background: #fff5e5; border-radius: 8px; }

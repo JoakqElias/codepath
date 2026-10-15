@@ -1,20 +1,26 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { getCourses } from '../services/contentRepository.js'
-import { activitiesForCourse } from '../services/contentRepository.js'
-import { evaluateAnswer, summarizeAnswers } from '../domain/practice'
-import { findLesson, getUnits, getActivities } from '../services/contentRepository.js'
+import { useRouter } from 'vue-router'
+import { getLessonContent, getIntroContent, checkAnswer } from '../services/contentRepository.js'
+import { summarizeAnswers } from '../domain/practice'
+import { useContent } from '../composables/useContent.js'
+import ContentState from '../components/ContentState.vue'
+import { canOpenLesson } from '../domain/learning.js'
+import { learningProgress } from '../stores/learningProgress.js'
 import { completeLesson, lessonScores } from '../stores/learningProgress.js'
 import { canSaveProfile, userStats, startAttempt, recordAnswer, endAttempt } from '../stores/userProfile.js'
-const courses = getCourses()
 
 const props = defineProps({ courseId: { type: String, required: true }, unitId: { type: String, default: '' }, lessonId: { type: String, default: '' } })
 const emit = defineEmits(['close'])
 const attemptId = ref(null)
+const checking = ref(false)
+const checkError = ref('')
+let disposed = false
 const confirmExit = ref(false)
 const closeButton = ref(null)
 const exitHeading = ref(null)
 async function requestClose () {
+  if (checking.value) return
   if (answers.value.length && !completed.value) {
     confirmExit.value = true
     await nextTick()
@@ -28,11 +34,19 @@ async function keepPracticing () {
 }
 defineExpose({ requestClose })
 onMounted(() => closeButton.value?.$el.focus())
-onBeforeUnmount(() => { if (attemptId.value) endAttempt(attemptId.value, true) })
+onBeforeUnmount(() => { disposed = true; if (attemptId.value) endAttempt(attemptId.value, true) })
 const isLesson = computed(() => Boolean(props.unitId || props.lessonId))
-const lesson = computed(() => findLesson(props.unitId, props.lessonId, props.courseId))
-const course = computed(() => courses.find(item => item.id === props.courseId))
-const activities = computed(() => isLesson.value ? getActivities(props.unitId, props.lessonId, props.courseId) : activitiesForCourse(props.courseId))
+const { data, loading, error, retry } = useContent(() => [props.courseId, props.unitId, props.lessonId],
+  () => isLesson.value ? getLessonContent(props.courseId, props.unitId, props.lessonId) : getIntroContent(props.courseId))
+const lesson = computed(() => data.value?.lesson)
+const course = computed(() => data.value?.course)
+const activities = computed(() => data.value?.activities || [])
+const router = useRouter()
+watch(data, value => {
+  if (isLesson.value && value?.lesson && !canOpenLesson(value.units, props.unitId, props.lessonId, learningProgress.value)) {
+    router.replace({ name: 'course', params: { courseId: props.courseId }, query: { bloqueada: '1' } })
+  }
+})
 const index = ref(0)
 const selected = ref(null)
 const answers = ref([])
@@ -47,7 +61,7 @@ const options = computed(() => current.value?.options.map(option => ({ label: op
 const passed = computed(() => activities.value.length > 0 && summary.value.correct === activities.value.length)
 const nextLesson = computed(() => {
   if (!isLesson.value || !completed.value) return null
-  const sequence = getUnits(props.courseId).flatMap(unit => unit.lessons.map(item => ({ courseId: props.courseId, unitId: unit.id, lessonId: item.id })))
+  const sequence = data.value.units.flatMap(unit => unit.lessons.map(item => ({ courseId: props.courseId, unitId: unit.id, lessonId: item.id })))
   const next = sequence[sequence.findIndex(item => item.lessonId === props.lessonId) + 1]
   return next ? { name: 'course-lesson', params: next } : null
 })
@@ -59,23 +73,32 @@ function reset () {
   selected.value = null
   answers.value = []
   completed.value = false
+  checkError.value = ''
 }
 watch(() => [props.courseId, props.unitId, props.lessonId], reset)
 
 async function check () {
-  if (!current.value || selected.value === null || feedback.value) return
-  const answer = evaluateAnswer(current.value, selected.value)
-  if (!attemptId.value) attemptId.value = startAttempt({ courseId: props.courseId,
-    title: isLesson.value ? lesson.value.title : course.value.name, total: activities.value.length })
-  recordAnswer(attemptId.value, answer)
-  answers.value.push(answer)
-  await nextTick()
-  feedbackPanel.value?.focus()
+  if (!current.value || selected.value === null || feedback.value || checking.value) return
+  checking.value = true
+  checkError.value = ''
+  const questionId = current.value.id
+  try {
+    const answer = await checkAnswer(questionId, selected.value)
+    if (disposed || current.value?.id !== questionId) return
+    if (!attemptId.value) attemptId.value = startAttempt({ courseId: props.courseId,
+      title: isLesson.value ? lesson.value.title : course.value.name, total: activities.value.length })
+    recordAnswer(attemptId.value, answer)
+    answers.value.push(answer)
+    await nextTick()
+    feedbackPanel.value?.focus()
+  } catch {
+    if (!disposed) checkError.value = 'No pudimos comprobar tu respuesta. No se contabilizó como incorrecta. Revisá la conexión y reintentá.'
+  } finally { checking.value = false }
 }
 async function advance () {
   if (!feedback.value || completed.value) return
   if (index.value + 1 === activities.value.length) {
-    if (isLesson.value) completeLesson(props.unitId, props.lessonId, answers.value, props.courseId)
+    if (isLesson.value) completeLesson(data.value.units, props.unitId, props.lessonId, answers.value)
     endAttempt(attemptId.value)
     completed.value = true
     await nextTick()
@@ -95,9 +118,10 @@ async function restart () {
 </script>
 
 <template>
-  <div class="practice-modal-toolbar"><span><q-icon name="code" /> Espacio de práctica</span><q-btn ref="closeButton" flat round icon="close" aria-label="Cerrar actividad" @click="requestClose" /></div>
+  <div class="practice-modal-toolbar"><span><q-icon name="code" /> Espacio de práctica</span><q-btn ref="closeButton" flat round icon="close" aria-label="Cerrar actividad" :disable="checking" @click="requestClose" /></div>
   <section v-if="confirmExit" class="practice-exit" role="alert" aria-labelledby="exit-title"><h2 id="exit-title" ref="exitHeading" tabindex="-1">¿Dejar esta práctica?</h2><p>Las respuestas realizadas y los XP se conservan. La práctica quedará interrumpida y tu racha volverá a cero.</p><div class="practice-buttons"><q-btn unelevated color="primary" no-caps label="Seguir practicando" @click="keepPracticing" /><q-btn outline color="primary" no-caps label="Salir de la práctica" @click="emit('close')" /></div></section>
-  <section v-else-if="!course || !activities.length" class="practice-exit"><h1 id="practice-title">Práctica no encontrada</h1><p>No hay actividades para esta dirección. Elegí una tecnología desde el catálogo.</p><q-btn unelevated no-caps color="primary" label="Explorar el catálogo" to="/cursos" class="q-mt-lg" /></section>
+  <ContentState v-else-if="loading || error" :loading="loading" :error="error" @retry="retry" />
+  <section v-else-if="!course || !activities.length" class="practice-exit"><h1 id="practice-title">Práctica no encontrada</h1><p>No hay actividades publicadas para esta dirección. Elegí una tecnología desde el catálogo.</p><q-btn unelevated no-caps color="primary" label="Explorar el catálogo" to="/cursos" class="q-mt-lg" /></section>
   <div v-else class="practice-page">
     <section class="container practice-container">
       <div class="practice-heading"><h1 id="practice-title">{{ isLesson ? lesson.title : course.name }}</h1><p v-if="isLesson">Terminá para avanzar. Repetí para llegar al 100 %.</p></div>
@@ -138,28 +162,28 @@ async function restart () {
             <pre class="exercise-code"><code>{{ current.code }}</code></pre>
           </div>
           <form id="practice-answer-form" @submit.prevent="check">
-            <fieldset :disabled="Boolean(feedback)" class="answer-fieldset" aria-labelledby="activity-question">
+            <fieldset :disabled="Boolean(feedback) || checking" class="answer-fieldset" aria-labelledby="activity-question">
               <legend class="sr-only">Elegí una respuesta para la actividad</legend>
-              <q-option-group :key="current.id" v-model="selected" :options="options" type="radio" color="primary" :disable="Boolean(feedback)" class="answer-options" :name="current.id" />
+              <q-option-group :key="current.id" v-model="selected" :options="options" type="radio" color="primary" :disable="Boolean(feedback) || checking" class="answer-options" :name="current.id" />
             </fieldset>
             <div class="feedback-region" aria-live="polite" aria-atomic="true">
               <div v-if="feedback" ref="feedbackPanel" tabindex="-1" class="answer-feedback" :class="feedback.isCorrect ? 'answer-feedback--correct' : 'answer-feedback--incorrect'">
                 <q-icon :name="feedback.isCorrect ? 'check_circle' : 'cancel'" size="25px" aria-hidden="true" />
                 <div><strong>{{ feedback.isCorrect ? '¡Respuesta correcta!' : 'Respuesta incorrecta. Veamos por qué.' }}</strong>
-                  <p v-if="!feedback.isCorrect">Respuesta correcta: {{ current.options.find(option => option.id === current.answerId).label }}</p>
                   <p>{{ feedback.explanation }}</p>
                 </div>
               </div>
             </div>
+            <div v-if="checkError" role="alert" class="check-error"><p>{{ checkError }}</p><q-btn type="button" outline no-caps color="primary" label="Reintentar comprobación" :loading="checking" @click="check" /></div>
           </form>
         </q-card>
         <p class="session-note practice-disclaimer"><q-icon name="info_outline" size="18px" aria-hidden="true" /> {{ isLesson ? 'Los ejemplos se muestran como texto. Las actividades comprueban tus respuestas, sin ejecutar código.' : 'Los ejemplos son ilustrativos: esta práctica no ejecuta código ni reemplaza al curso completo.' }}</p>
       </template>
     </section>
   </div>
-  <div v-if="course && activities.length && !completed && !confirmExit" class="practice-actionbar">
+  <div v-if="!loading && !error && course && activities.length && !completed && !confirmExit" class="practice-actionbar">
     <span class="session-note">{{ feedback ? 'Leé la devolución y continuá.' : selected === null ? 'Elegí una opción para comprobar.' : 'Tu respuesta está lista para comprobar.' }}</span>
-    <q-btn v-if="!feedback" form="practice-answer-form" type="submit" unelevated no-caps color="primary" label="Comprobar respuesta" :disable="selected === null" />
+    <q-btn v-if="!feedback" form="practice-answer-form" type="submit" unelevated no-caps color="primary" label="Comprobar respuesta" :disable="selected === null || checking" :loading="checking" />
     <q-btn v-else type="button" unelevated no-caps color="primary" :label="index + 1 === activities.length ? 'Ver resultados' : 'Siguiente actividad'" icon-right="arrow_forward" @click="advance" />
   </div>
 </template>

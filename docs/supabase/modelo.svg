@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="820" viewBox="0 0 1180 820" role="img" aria-labelledby="title desc">
+  <title id="title">CodePath · Modelo relacional de contenidos</title>
+  <desc id="desc">Cursos contienen unidades y preguntas introductorias. Unidades contienen lecciones. Lecciones contienen preguntas. Cada pregunta tiene opciones y una solución privada. Una pregunta tiene exactamente un padre: lección o curso introductorio.</desc>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10" fill="none" stroke="#526079" stroke-width="1.5"/></marker></defs>
+  <rect width="1180" height="820" fill="#f8f9fc"/>
+  <g font-family="Arial, sans-serif" fill="#17243d">
+    <text x="40" y="43" font-size="25" font-weight="700">CodePath · Modelo relacional de contenidos</text>
+    <text x="40" y="70" font-size="15" fill="#526079">5 tablas públicas de lectura · soluciones aisladas en un esquema privado</text>
+    <g fill="none" stroke="#526079" stroke-width="2" marker-end="url(#arrow)">
+      <path d="M340 195H428"/><path d="M738 195H818"/>
+      <path d="M975 290V340H285V400"/>
+      <path d="M285 625V657H825V625"/>
+      <path d="M340 490H428"/>
+      <path d="M738 490H818"/>
+      <path d="M190 290V400" stroke-dasharray="7 5"/>
+    </g>
+    <g font-size="13" fill="#526079">
+      <text x="354" y="183">1 → N</text><text x="752" y="183">1 → N</text>
+      <text x="490" y="332">Lección 0..1 → N preguntas</text>
+      <text x="350" y="477">1 → N</text><text x="750" y="477">1 → 0..1</text>
+      <text x="427" y="680">Pregunta 1 → 0..1 solución</text>
+      <text x="45" y="353">Curso introductorio</text><text x="65" y="372">0..1 → N preguntas</text>
+    </g>
+    <g stroke="#d8deea" fill="#fff">
+      <rect x="40" y="110" width="300" height="180" rx="8"/>
+      <rect x="438" y="110" width="300" height="180" rx="8"/>
+      <rect x="828" y="110" width="310" height="180" rx="8"/>
+      <rect x="40" y="400" width="300" height="225" rx="8"/>
+      <rect x="438" y="400" width="300" height="225" rx="8"/>
+      <rect x="828" y="400" width="310" height="225" rx="8" fill="#eeebff"/>
+    </g>
+    <g font-size="19" font-weight="700">
+      <text x="60" y="143">public.courses</text><text x="458" y="143">public.units</text><text x="848" y="143">public.lessons</text>
+      <text x="60" y="433">public.questions</text><text x="458" y="433">public.answer_options</text><text x="848" y="433">private.solutions</text>
+    </g>
+    <g font-size="15" font-family="Consolas, monospace">
+      <text x="60" y="177">PK id</text><text x="60" y="204">name, description</text><text x="60" y="231">UQ position</text><text x="60" y="258">publication_status</text>
+      <text x="458" y="177">PK id · FK course_id</text><text x="458" y="204">title, description</text><text x="458" y="231">position, is_available</text><text x="458" y="258">publication_status</text>
+      <text x="848" y="177">PK id · FK unit_id</text><text x="848" y="204">title, content[], code</text><text x="848" y="231">position</text><text x="848" y="258">publication_status</text>
+      <text x="60" y="467">PK id</text><text x="60" y="494">FK lesson_id (nullable)</text><text x="60" y="521">FK intro_course_id (nullable)</text><text x="60" y="548">prompt, concept?, code?</text><text x="60" y="575">position</text><text x="60" y="602">publication_status</text>
+      <text x="458" y="467">PK id</text><text x="458" y="494">FK question_id</text><text x="458" y="521">label, position</text><text x="458" y="548">UQ question_id, position</text><text x="458" y="575">UQ question_id, id</text>
+      <text x="848" y="467">PK / FK question_id</text><text x="848" y="494">FK correct_option_id</text><text x="848" y="521">explanation</text><text x="848" y="559">FK compuesta a opciones:</text><text x="848" y="586">question_id + option_id</text>
+    </g>
+    <text x="40" y="725" font-size="15" font-weight="700">Integridad y acceso</text>
+    <g font-size="14" fill="#526079"><text x="40" y="752">CHECK: exactamente un padre por pregunta · posiciones positivas y únicas entre hermanos · FK con cascada</text>
+      <text x="40" y="775">RLS en las seis tablas · visitantes: SELECT publicado y RPC de práctica · sin acceso directo a soluciones</text>
+      <text x="40" y="798">La FK de solución garantiza que la opción correcta pertenece a la misma pregunta. Diccionario y SQL: docs/supabase.</text></g>
+  </g>
+</svg>

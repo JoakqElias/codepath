@@ -1,15 +1,18 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { getCourses } from '../services/contentRepository.js'
+import { useContent } from '../composables/useContent.js'
+import ContentState from '../components/ContentState.vue'
 import { profileStats, attemptPassed } from '../domain/profile.js'
 import { userProfile, userStats, canSaveProfile, updateIdentity } from '../stores/userProfile.js'
-const courses = getCourses()
+const { data, loading, error, retry } = useContent(() => [], getCourses)
+const courses = computed(() => data.value || [])
 
 const name = ref(userProfile.value.name)
 const avatar = ref(userProfile.value.avatar)
 const saved = ref(false)
 const avatars = [{ value: 'code', label: 'Código' }, { value: 'rocket_launch', label: 'Cohete' }, { value: 'pets', label: 'Huella' }, { value: 'psychology', label: 'Ideas' }]
-const technologies = computed(() => courses.map(course => ({ ...course, stats: profileStats(userProfile.value.attempts.filter(a => a.courseId === course.id)) })))
+const technologies = computed(() => courses.value.map(course => ({ ...course, stats: profileStats(userProfile.value.attempts.filter(a => a.courseId === course.id)) })))
 const history = computed(() => userProfile.value.attempts.filter(a => a.status !== 'active' && a.answers.length).slice(-8).reverse())
 function save () { updateIdentity(name.value, avatar.value); saved.value = true }
 </script>
@@ -33,6 +36,7 @@ function save () { updateIdentity(name.value, avatar.value); saved.value = true 
       </div>
       <div class="profile-columns">
         <section class="profile-panel" aria-labelledby="skills-title"><h2 id="skills-title">Tus habilidades por tecnología</h2>
+          <ContentState :loading="loading" :error="error" @retry="retry" />
           <div v-for="course in technologies" :key="course.id" class="technology-skill"><div><strong>{{ course.name }}</strong><span>{{ course.stats.skill === null ? 'Por descubrir' : course.stats.skill + '%' }}</span></div><q-linear-progress rounded size="7px" :value="(course.stats.skill || 0) / 100" color="primary" track-color="grey-3" :aria-label="course.name + ': ' + (course.stats.skill === null ? 'sin respuestas' : course.stats.skill + '% de aciertos')" /><p>{{ course.stats.correct }} de {{ course.stats.answered }} respuestas correctas</p></div>
         </section>
         <div>

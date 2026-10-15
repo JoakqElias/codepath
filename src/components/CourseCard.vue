@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 const props = defineProps({ course: { type: Object, required: true }, practiceCount: { type: Number, default: 0 } })
 const emit = defineEmits(['seleccionar'])
-const available = computed(() => props.course.status === 'available' && props.course.units.length > 0 && Boolean(props.course.entryRoute))
+const available = computed(() => props.course.status === 'available' && Boolean(props.course.entryRoute))
 const select = destination => emit('seleccionar', { courseId: props.course.id, destination })
 const visualLabel = computed(() => props.course.visual?.label || props.course.name.slice(0, 3))
 </script>
@@ -17,13 +17,13 @@ const visualLabel = computed(() => props.course.visual?.label || props.course.na
       <span class="eyebrow">{{ course.category }}</span>
       <h2 :id="'course-' + course.id">{{ course.name }}</h2>
       <p>{{ course.description }}</p>
-      <span class="course-status"><q-icon :name="available ? 'check_circle' : 'schedule'" size="17px" aria-hidden="true" /> {{ available ? 'Recorrido inicial · ' + course.units.reduce((total, unit) => total + unit.lessons.length, 0) + ' lecciones' : 'Curso completo: Próximamente' }}</span>
+      <span class="course-status"><q-icon :name="available ? 'check_circle' : 'schedule'" size="17px" aria-hidden="true" /> {{ available ? 'Consultar unidades publicadas' : 'Próximamente' }}</span>
       <span v-if="practiceCount" class="practice-status"><q-icon name="task_alt" size="17px" aria-hidden="true" /> {{ practiceCount }} actividades introductorias disponibles</span>
     </q-card-section>
     <q-card-actions class="course-actions">
       <q-btn v-if="available" unelevated no-caps class="full-width" color="primary" label="Ver unidades" icon-right="arrow_forward"
         :aria-label="'Ver unidades de ' + course.name" @click="select('course')" />
-      <q-btn v-if="practiceCount" :outline="available" :unelevated="!available" no-caps class="full-width" color="primary"
+      <q-btn v-if="available" outline no-caps class="full-width" color="primary"
         @click="select('practice')" label="Probar actividades" icon-right="arrow_forward"
         :aria-label="'Probar actividades de ' + course.name" :data-practice-trigger="course.id" />
       <q-btn v-if="!available" flat no-caps disable class="full-width course-access" color="primary" icon="lock_outline"

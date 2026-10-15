@@ -2,6 +2,7 @@
 export function unitState (units, unitId, completedLessons) {
   const index = units.findIndex(unit => unit.id === unitId)
   if (index === -1) return 'locked'
+  if (units[index].isAvailable === false || !units[index].lessons.length) return 'unavailable'
   const completed = unit => unit.lessons.length > 0 && unit.lessons.every(lesson => completedLessons.includes(lesson.id))
   if (!units.slice(0, index).every(completed)) return 'locked'
   return completed(units[index]) ? 'completed' : 'available'
@@ -9,15 +10,17 @@ export function unitState (units, unitId, completedLessons) {
 export function canOpenLesson (units, unitId, lessonId, completedLessons) {
   const unit = units.find(unit => unit.id === unitId)
   const index = unit?.lessons.findIndex(lesson => lesson.id === lessonId) ?? -1
-  return index >= 0 && unitState(units, unitId, completedLessons) !== 'locked' &&
+  return index >= 0 && ['available', 'completed'].includes(unitState(units, unitId, completedLessons)) &&
     unit.lessons.slice(0, index).every(lesson => completedLessons.includes(lesson.id))
 }
 export function lessonResult (units, unitId, lessonId, answers, completedLessons) {
   const lesson = units.find(unit => unit.id === unitId)?.lessons.find(item => item.id === lessonId)
   if (!lesson || !canOpenLesson(units, unitId, lessonId, completedLessons) || !lesson.activities.length ||
       answers.length !== lesson.activities.length || !lesson.activities.every((activity, i) =>
-        answers[i]?.activityId === activity.id && activity.options.some(option => option.id === answers[i]?.answerId))) return null
-  const correct = lesson.activities.filter((activity, i) => activity.answerId === answers[i].answerId).length
+        answers[i]?.activityId === activity.id && typeof answers[i]?.isCorrect === 'boolean' &&
+        activity.options.some(option => option.id === answers[i]?.answerId))) return null
+  // Solo resultados recibidos por RPC. Estadísticas locales de práctica, sin ranking oficial.
+  const correct = answers.filter(answer => answer.isCorrect).length
   return { correct, total: lesson.activities.length, percentage: Math.round(correct / lesson.activities.length * 1000) / 10 }
 }
 export function recordLessonResult (units, unitId, lessonId, answers, passedLessons, completedLessons = passedLessons) {

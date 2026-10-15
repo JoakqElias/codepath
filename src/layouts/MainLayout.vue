@@ -80,7 +80,7 @@ watch(() => route.fullPath, async (to, from) => {
       </nav>
     </q-header>
     <q-page-container><div id="main-content" ref="mainContent" :inert="isPractice || undefined" :aria-hidden="isPractice || undefined"><router-view :route="backgroundRoute" /></div>
-      <footer class="site-footer" :inert="isPractice || undefined"><div class="container footer-content"><router-link to="/" class="brand-link" aria-label="CodePath, inicio"><BrandLogo /></router-link><p>Un nuevo camino empieza con curiosidad.</p><span class="footer-status">Segunda entrega · Recorrido funcional</span></div></footer>
+      <footer class="site-footer" :inert="isPractice || undefined"><div class="container footer-content"><router-link to="/" class="brand-link" aria-label="CodePath, inicio"><BrandLogo /></router-link><p>Un nuevo camino empieza con curiosidad.</p><span class="footer-status">Contenidos compartidos · Práctica personal</span></div></footer>
     </q-page-container>
     <q-dialog :model-value="isPractice" persistent no-shake no-refocus backdrop-filter="blur(8px)" class="practice-dialog" aria-label="Actividad de CodePath" :aria-hidden="!isPractice || undefined" @hide="restoreFocus">
       <div class="practice-modal" @keydown.esc.stop.prevent="practice?.requestClose()" @keydown.tab="containTab">

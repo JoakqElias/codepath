@@ -1,63 +1,32 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { javascriptUnits as units, javascriptLessons, javascriptActivities } from '../src/data/javascriptCourse.js'
-import { activities as introActivities } from '../src/data/activities.js'
-import { unitState, canOpenLesson, recordLessonResult } from '../src/domain/learning.js'
-import { evaluateAnswer } from '../src/domain/practice.js'
+import { lessonResult, unitState, canOpenLesson, recordBestScore, recordLessonCompletion } from '../src/domain/learning.js'
+import { summarizeAnswers } from '../src/domain/practice.js'
 
-const rightAnswers = lesson => lesson.activities.map(activity => evaluateAnswer(activity, activity.answerId))
+const activities = ['q1', 'q2', 'q3'].map(id => ({ id, options: [{ id: id + '-a' }, { id: id + '-b' }] }))
+const units = [{ id: 'u1', isAvailable: true, lessons: [{ id: 'l1', activities }, { id: 'l2', activities }] },
+  { id: 'u2', isAvailable: false, lessons: [] }]
+const answers = activities.map(q => ({ activityId: q.id, answerId: q.id + '-a', isCorrect: true }))
 
-test('cinco unidades, diez lecciones y cuarenta ejercicios con referencias y soluciones válidas', () => {
-  assert.equal(units.length, 5)
-  assert.equal(javascriptLessons.length, 10)
-  assert.equal(javascriptActivities.length, 40)
-  assert.equal(new Set([...introActivities, ...javascriptActivities].map(item => item.id)).size, 67)
-  assert.equal(new Set(javascriptLessons.map(item => item.id)).size, 10)
-  assert.equal(new Set(units.map(item => item.id)).size, 5)
-  for (const [index, unit] of units.entries()) {
-    assert.ok(unit.title && unit.description && unit.icon)
-    assert.equal(unit.publicationStatus, 'published')
-    assert.equal(unit.courseId, 'javascript')
-    for (const lesson of unit.lessons) {
-      assert.ok(lesson.title && lesson.content.length && lesson.code && lesson.description)
-      assert.equal(lesson.activities.length, 4)
-      for (const activity of lesson.activities) {
-        assert.equal(activity.lessonId, lesson.id)
-        assert.equal(activity.courseId, 'javascript')
-        assert.equal(activity.options.filter(option => option.id === activity.answerId).length, 1)
-        for (const option of activity.options) assert.equal(evaluateAnswer(activity, option.id).isCorrect, option.id === activity.answerId)
-      }
-    }
-  }
+test('el resultado de práctica usa correcciones del servidor y no requiere soluciones', () => {
+  assert.deepEqual(lessonResult(units, 'u1', 'l1', answers, []), { correct: 3, total: 3, percentage: 100 })
+  const mixed = answers.map((a, i) => ({ ...a, isCorrect: i !== 0 }))
+  assert.equal(lessonResult(units, 'u1', 'l1', mixed, []).percentage, 66.7)
+  assert.deepEqual(summarizeAnswers(mixed), { answered: 3, correct: 2, incorrect: 1 })
 })
-
-test('desbloqueo secuencial de lecciones y unidades, con progreso completo real', () => {
-  let passed = []
-  assert.equal(unitState(units, 'no-existe', passed), 'locked')
-  assert.equal(canOpenLesson(units, 'no-existe', 'no-existe', passed), false)
-  for (const [index, unit] of units.entries()) {
-    assert.equal(unitState(units, unit.id, passed), 'available')
-    assert.equal(canOpenLesson(units, unit.id, unit.lessons[1].id, passed), false)
-    if (units[index + 1]) assert.equal(unitState(units, units[index + 1].id, passed), 'locked')
-    for (const lesson of unit.lessons) {
-      assert.equal(canOpenLesson(units, unit.id, lesson.id, passed), true)
-      passed = recordLessonResult(units, unit.id, lesson.id, rightAnswers(lesson), passed)
-    }
-    assert.equal(unitState(units, unit.id, passed), 'completed')
-  }
-  assert.equal(passed.length, 10)
-  assert.equal(new Set(passed).size, 10)
+test('solo terminar un intento válido desbloquea, incluso con cero aciertos', () => {
+  assert.equal(canOpenLesson(units, 'u1', 'l2', []), false)
+  const done = recordLessonCompletion(units, 'u1', 'l1', answers.map(a => ({ ...a, isCorrect: false })), [])
+  assert.equal(canOpenLesson(units, 'u1', 'l2', done), true)
+  assert.equal(unitState(units, 'u2', done), 'unavailable')
+  assert.equal(canOpenLesson(units, 'u2', 'inexistente', done), false)
 })
-
-test('no se aprueba con respuestas incompletas, incorrectas, duplicadas, ajenas o contenido bloqueado', () => {
-  const unit = units[0], lesson = unit.lessons[0], correct = rightAnswers(lesson)
-  const wrong = lesson.activities.map(activity => evaluateAnswer(activity, activity.options.find(option => option.id !== activity.answerId).id))
-  for (const answers of [[], correct.slice(0, 1), wrong, [correct[0], correct[0]], [...correct].reverse(), wrong.map(answer => ({ ...answer, isCorrect: true }))]) {
-    assert.deepEqual(recordLessonResult(units, unit.id, lesson.id, answers, []), [])
-  }
-  assert.deepEqual(recordLessonResult(units, units[1].id, units[1].lessons[0].id, rightAnswers(units[1].lessons[0]), []), [])
-  assert.deepEqual(recordLessonResult(units, unit.id, unit.lessons[1].id, rightAnswers(unit.lessons[1]), []), [])
-  const passed = recordLessonResult(units, unit.id, lesson.id, correct, [])
-  assert.deepEqual(recordLessonResult(units, unit.id, lesson.id, correct, passed), passed)
-  assert.deepEqual(recordLessonResult(units, unit.id, lesson.id, wrong, passed), passed)
+test('rechaza respuestas incompletas, ajenas, duplicadas o sin corrección', () => {
+  for (const invalid of [answers.slice(1), [answers[0], answers[0], answers[0]], answers.map(a => ({ ...a, answerId: 'ajena' })),
+    answers.map(({ isCorrect, ...a }) => a)]) assert.equal(lessonResult(units, 'u1', 'l1', invalid, []), null)
+  assert.equal(lessonResult(units, 'u1', 'l2', answers, []), null)
+})
+test('la mejor marca se conserva al repetir con menor porcentaje', () => {
+  assert.equal(recordBestScore({ l1: 100 }, 'l1', { percentage: 66.7 }).l1, 100)
+  assert.equal(recordBestScore({ l1: 66.7 }, 'l1', { percentage: 100 }).l1, 100)
 })

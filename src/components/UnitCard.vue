@@ -2,11 +2,11 @@
 import { computed } from 'vue'
 const props = defineProps({
   unit: { type: Object, required: true }, number: { type: Number, required: true },
-  status: { type: String, required: true, validator: value => ['available', 'locked', 'completed'].includes(value) },
+  status: { type: String, required: true, validator: value => ['available', 'locked', 'completed', 'unavailable'].includes(value) },
   completedLessons: { type: Number, default: 0 }, mastery: { type: Number, default: 0 }
 })
 const emit = defineEmits(['seleccionar'])
-const states = { available: { label: 'Disponible', icon: 'play_circle_outline' }, locked: { label: 'Bloqueada', icon: 'lock_outline' }, completed: { label: 'Terminada', icon: 'check_circle' } }
+const states = { unavailable: { label: 'No disponible', icon: 'schedule' }, available: { label: 'Disponible', icon: 'play_circle_outline' }, locked: { label: 'Bloqueada', icon: 'lock_outline' }, completed: { label: 'Terminada', icon: 'check_circle' } }
 const state = computed(() => states[props.status])
 </script>
 
@@ -19,9 +19,10 @@ const state = computed(() => states[props.status])
       <p class="unit-count">{{ completedLessons }} de {{ unit.lessons.length }} lecciones terminadas · {{ mastery }} % de aciertos</p>
       <q-linear-progress rounded size="7px" :value="mastery / 100" :color="mastery === 100 ? 'positive' : 'primary'" track-color="grey-3" :aria-label="mastery + ' % de aciertos, promedio de los mejores intentos'" />
       <p v-if="status === 'locked'" class="unit-lock-note">Terminá las lecciones de la unidad anterior para continuar.</p>
+      <p v-if="status === 'unavailable'" class="unit-lock-note">Esta unidad todavía no tiene lecciones publicadas.</p>
     </div>
-    <q-btn no-caps unelevated color="primary" :disable="status === 'locked'" :icon="state.icon"
-      :label="status === 'locked' ? 'Bloqueada' : status === 'completed' ? 'Repasar unidad' : 'Ver lecciones'"
-      :aria-label="(status === 'locked' ? 'Bloqueada: ' : 'Abrir unidad: ') + unit.title" @click="emit('seleccionar', unit.id)" />
+    <q-btn no-caps unelevated color="primary" :disable="['locked', 'unavailable'].includes(status)" :icon="state.icon"
+      :label="status === 'unavailable' ? 'No disponible' : status === 'locked' ? 'Bloqueada' : status === 'completed' ? 'Repasar unidad' : 'Ver lecciones'"
+      :aria-label="(status === 'unavailable' ? 'No disponible: ' : status === 'locked' ? 'Bloqueada: ' : 'Abrir unidad: ') + unit.title" @click="emit('seleccionar', unit.id)" />
   </q-card>
 </template>
